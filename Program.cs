@@ -1,9 +1,12 @@
 ﻿using System.Security.Cryptography.X509Certificates;
+using System.Collections.Generic;
 
 namespace óbudai
 {
     internal class Program
     {
+        static List<string> szavak;
+
         static void Main(string[] args)
         {
             //1. feladat
@@ -30,8 +33,19 @@ namespace óbudai
             string kodolt = Console.ReadLine(); //kódolt üzenet
             Console.Write("Írja ide a kulcsot! ");
             string kulcs2 = Console.ReadLine();
-            Console.WriteLine("A rejtjelezett üzenet: {0}", Dekódolás(kodolt, kulcs2));
+            Console.WriteLine("A dekódolt üzenet: {0}", Dekódolás(kodolt, kulcs2));
+            
+            //2. feladat
+            Console.WriteLine("2. feladat");
+            Console.Write("Írja ide az első kódolt üzenetet! ");
+            string uz1 = Console.ReadLine();
+            Console.Write("Írja ide a második kódolt üzenetet! ");
+            szavak = new List<string>();
+            szavak.AddRange(File.ReadAllLines("words.txt"));
+            string uz2 = Console.ReadLine();
+            Console.Write("A közös kulcs: {0}", Kozoskulcs(uz1, uz2, ""));
         }
+
         static string Rejtjelezes(string uzenet, string kulcs1)
         {
             Dictionary<char, int> abc = new Dictionary<char, int>();
@@ -43,6 +57,7 @@ namespace óbudai
                 revabc.Add((int)c - (int)'a', c);
             }
             abc.Add(' ', 26);
+            revabc.Add(26, ' ');
             string ruzenet = ""; //rejtjelezett üzenet
             int szam = 0; //rejtjelezett üzenet i. karakterének kódja
             for (int i = 0; i < uzenet.Length; i++)
@@ -67,8 +82,18 @@ namespace óbudai
                 revabc.Add((int)c - (int)'a', c);
             }
             abc.Add(' ', 26);
+            revabc.Add(26, ' ');
             string uzenet = ""; //dekódolt üzenet
-            for (int i = 0; i < kodolt.Length; i++)
+            int n = 0;
+            if (kodolt.Length > kulcs2.Length)
+            {
+                n = kulcs2.Length;
+            }
+            else
+            {
+                n = kodolt.Length;
+            }
+            for (int i = 0; i < n; i++)
             {
                 int szamrejt = 0; //kódolt üzenet i. karakterének kódja
                 int szamkulcs = 0; //kulcs i. karakterének kódja
@@ -89,6 +114,47 @@ namespace óbudai
                 }
             }
             return uzenet;
+        }
+
+        static bool Joe(string uz2, string kulcs)
+        {
+            string dekuz2 = Dekódolás(uz2, kulcs); //2. üzenet dekódolva
+            List<string> words = new List<string>();
+            words.AddRange(dekuz2.Split(" "));
+            for (int i = 0; i < words.Count - 1; i++)
+            {
+                if (!szavak.Contains(words[i]))
+                {
+                    return false;
+                }
+
+            }
+            for (int i = 0; i < szavak.Count; i++)
+            {
+                if (szavak[i].StartsWith(words[words.Count - 1]))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        static string Kozoskulcs(string uz1, string uz2, string kulcs)
+        {
+            if ((uz1.Length <= kulcs.Length) || (uz2.Length <= kulcs.Length))
+            {
+                return kulcs;
+            }
+            string dekuz1 = Dekódolás(uz1, kulcs); //1. üzenet dekódolva
+            for (int i = 0; i < szavak.Count; i++)
+            {
+                kulcs = Dekódolás(uz1, (dekuz1 + " " + szavak[i]).Trim());
+                if (Joe(uz2, kulcs))
+                {
+                    return Kozoskulcs(uz1, uz2, kulcs);
+                }
+            }
+            return "";
+
         }
     }
 }
