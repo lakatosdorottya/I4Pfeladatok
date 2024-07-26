@@ -6,9 +6,26 @@ namespace óbudai
     internal class Program
     {
         static List<string> szavak;
+        static Dictionary<char, int> abc;
+        static Dictionary<int, char> revabc;
+        static List<string> JoKulcsok;
 
         static void Main(string[] args)
         {
+            JoKulcsok = new List<string>();
+            abc = new Dictionary<char, int>();
+            revabc = new Dictionary<int, char>();
+            szavak = new List<string>();
+            szavak.AddRange(File.ReadAllLines("words.txt"));
+            for (char c = 'a'; c <= 'z'; c++)
+            {
+
+                abc.Add(c, (int)c - (int)'a');
+                revabc.Add((int)c - (int)'a', c);
+            }
+            abc.Add(' ', 26);
+            revabc.Add(26, ' ');
+
             //1. feladat
             //üzenet és kód rejtjelezése
             Console.WriteLine("1. feladat: Üzenet és kód rejtett üzenetté alakítása");
@@ -22,7 +39,7 @@ namespace óbudai
             }
             else
             {
-                
+
                 Console.WriteLine("A rejtjelezett üzenet: {0}", Rejtjelezes(uzenet, kulcs1));
             }
 
@@ -36,31 +53,38 @@ namespace óbudai
             Console.WriteLine("A dekódolt üzenet: {0}", Dekódolás(kodolt, kulcs2));
             
             //2. feladat
-            Console.WriteLine("2. feladat");
+             Console.WriteLine("2. feladat");
             Console.Write("Írja ide az első kódolt üzenetet! ");
             string uz1 = Console.ReadLine();
-            Console.Write("Írja ide a második kódolt üzenetet! ");
-            szavak = new List<string>();
-            szavak.AddRange(File.ReadAllLines("words.txt"));
+            Console.Write("Írja ide a második kódolt üzenetet! "); 
             string uz2 = Console.ReadLine();
-            Console.Write("A közös kulcs: {0}", Kozoskulcs(uz1, uz2, ""));
+
+            Kozoskulcs(uz1, uz2, "");
+
+            Console.WriteLine("A talált közös kulcsok:");
+            foreach (string kulcs in JoKulcsok)
+            {
+                if ((kulcs.Length >= uz1.Length) || (kulcs.Length >= uz2.Length))
+                {
+                    Console.WriteLine(kulcs);
+                }
+            }
         }
 
         static string Rejtjelezes(string uzenet, string kulcs1)
         {
-            Dictionary<char, int> abc = new Dictionary<char, int>();
-            Dictionary<int, char> revabc = new Dictionary<int, char>();
-            for (char c = 'a'; c <= 'z'; c++)
-            {
-
-                abc.Add(c, (int)c - (int)'a');
-                revabc.Add((int)c - (int)'a', c);
-            }
-            abc.Add(' ', 26);
-            revabc.Add(26, ' ');
             string ruzenet = ""; //rejtjelezett üzenet
             int szam = 0; //rejtjelezett üzenet i. karakterének kódja
-            for (int i = 0; i < uzenet.Length; i++)
+            int n = 0;
+            if (uzenet.Length > kulcs1.Length)
+            {
+                n = kulcs1.Length;
+            }
+            else
+            {
+                n = uzenet.Length;
+            }
+            for (int i = 0; i < n; i++)
             {
                 char nu = uzenet[i]; //i. vizsgált karaktere az üzenetnek
                 char nk = kulcs1[i]; //i. vizsgált karaktere a kulcsnak
@@ -73,16 +97,6 @@ namespace óbudai
         }
         static string Dekódolás(string kodolt, string kulcs2)
         {
-            Dictionary<char, int> abc = new Dictionary<char, int>();
-            Dictionary<int, char> revabc = new Dictionary<int, char>();
-            for (char c = 'a'; c <= 'z'; c++)
-            {
-
-                abc.Add(c, (int)c - (int)'a');
-                revabc.Add((int)c - (int)'a', c);
-            }
-            abc.Add(' ', 26);
-            revabc.Add(26, ' ');
             string uzenet = ""; //dekódolt üzenet
             int n = 0;
             if (kodolt.Length > kulcs2.Length)
@@ -138,23 +152,25 @@ namespace óbudai
             }
             return false;
         }
-        static string Kozoskulcs(string uz1, string uz2, string kulcs)
+        static void Kozoskulcs(string uz1, string uz2, string kulcs)
         {
             if ((uz1.Length <= kulcs.Length) || (uz2.Length <= kulcs.Length))
             {
-                return kulcs;
+                return;
             }
             string dekuz1 = Dekódolás(uz1, kulcs); //1. üzenet dekódolva
             for (int i = 0; i < szavak.Count; i++)
             {
-                kulcs = Dekódolás(uz1, (dekuz1 + " " + szavak[i]).Trim());
+                string tesztuz1 = dekuz1 + " " + szavak[i];
+                tesztuz1 = tesztuz1.Trim();
+                kulcs = Dekódolás(uz1, tesztuz1);
                 if (Joe(uz2, kulcs))
                 {
-                    return Kozoskulcs(uz1, uz2, kulcs);
+                    JoKulcsok.Add(kulcs);
+                    Kozoskulcs(uz1, uz2, kulcs);
                 }
             }
-            return "";
-
+            return;
         }
     }
 }
