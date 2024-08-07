@@ -102,7 +102,11 @@ namespace I4Pfeladatok
 
                     if (eredmeny == JoeErtek.TeljesenJo)
                     {
-                        JoKulcsok.Add(p_kulcs);
+                        if (harmadik.Joe() == JoeErtek.TeljesenJo)
+                        {
+                            JoKulcsok.Add(p_kulcs);
+                        }
+                        
                     }
                     
                     Kozoskulcs(p_kodolt, p_negyedik, p_kulcs);

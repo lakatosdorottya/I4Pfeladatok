@@ -133,8 +133,13 @@ namespace I4Pfeladatok
             }
             for (int i = 0; i < Program.szavak.Count; i++)
             {
+                if (Program.szavak[i] == (words[words.Count - 1]))
+                {
+                    return JoeErtek.TeljesenJo;
+                }
                 if (Program.szavak[i].StartsWith(words[words.Count - 1]))
                 {
+
                     return JoeErtek.ReszbenJo;
                 }
             }
