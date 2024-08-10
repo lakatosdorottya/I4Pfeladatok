@@ -133,7 +133,7 @@ namespace I4Pfeladatok
             }
             for (int i = 0; i < Program.szavak.Count; i++)
             {
-                if (Program.szavak[i] == (words[words.Count - 1]))
+                if ((Program.szavak[i] == (words[words.Count - 1])) && (kodolt.Length <= kulcs.Length))
                 {
                     return JoeErtek.TeljesenJo;
                 }
